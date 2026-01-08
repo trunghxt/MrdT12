@@ -12,6 +12,8 @@ const CONFIG = {
 const ELEMENTS = {
     totalSpend: document.getElementById('totalSpend'),
     totalMessages: document.getElementById('totalMessages'),
+    avgPrice: document.getElementById('avgPrice'),
+    monthFilter: document.getElementById('monthFilter'),
     tableBody: document.querySelector('#dataTable tbody'),
     loading: document.getElementById('loading'),
     error: document.getElementById('error'),
@@ -28,21 +30,45 @@ const formatCurrency = (amount) => {
 };
 
 const parseDate = (dateStr) => {
-    // Expecting DD/MM/YYYY
     if (!dateStr) return null;
-    const parts = dateStr.split('/');
-    if (parts.length !== 3) return null;
-    return new Date(parts[2], parts[1] - 1, parts[0]);
+
+    // Normalize separators
+    const cleanStr = dateStr.trim().replace(/[-.]/g, '/');
+    const parts = cleanStr.split('/');
+
+    // Handle MM/DD/YYYY
+    if (parts.length === 3) {
+        const month = parseInt(parts[0], 10) - 1; // 0-indexed
+        const day = parseInt(parts[1], 10);
+        const year = parseInt(parts[2], 10);
+
+        // Basic validation
+        if (year < 2000 || year > 2100) return null; // Ignore likely junk years
+        if (month < 0 || month > 11) return null;
+        if (day < 1 || day > 31) return null;
+
+        return new Date(year, month, day);
+    }
+
+    // Fallback: try standard Date parse (ISO)
+    const timestamp = Date.parse(cleanStr);
+    if (!isNaN(timestamp)) {
+        return new Date(timestamp);
+    }
+
+    return null;
 };
 
 // Safe Getter
 const getVal = (row, key) => {
     // Handle case where keys might have trailing spaces (common in spreadsheets)
-    const exact = row[key];
-    if (exact !== undefined) return exact;
+    if (row[key] !== undefined) return row[key];
 
-    // Fuzzy match key if needed
-    const foundKey = Object.keys(row).find(k => k.trim() === key.trim());
+    // Fuzzy match key
+    const normalize = k => k.trim().toLowerCase();
+    const target = normalize(key);
+
+    const foundKey = Object.keys(row).find(k => normalize(k) === target);
     return foundKey ? row[foundKey] : null;
 };
 
@@ -107,10 +133,9 @@ async function fetchData() {
             return b.dateObj - a.dateObj;
         });
 
-        // Initial render with all data
-        const grouped = groupDataByDate(rawData);
-        renderData(grouped);
-        updateKPIs(rawData); // KPIs still calculate based on total raw data usually, or visible? Let's use raw for "Total" unless filtered.
+        // Initial process
+        populateMonthFilter(rawData);
+        applyFilters();
 
     } catch (err) {
         console.error(err);
@@ -162,6 +187,9 @@ function updateKPIs(data) {
 
     ELEMENTS.totalSpend.textContent = formatCurrency(totalSpend);
     ELEMENTS.totalMessages.textContent = totalMessages.toLocaleString('vi-VN');
+
+    const avgPrice = totalMessages > 0 ? totalSpend / totalMessages : 0;
+    ELEMENTS.avgPrice.textContent = formatCurrency(avgPrice);
 }
 
 function renderData(groupedData) {
@@ -183,6 +211,8 @@ function renderData(groupedData) {
         const uniqueCampaigns = [...new Set(item.campaigns)];
         let campaignHtml = uniqueCampaigns.join('<br>');
 
+        const pricePerMess = item.messages > 0 ? item.spend / item.messages : 0;
+
         tr.innerHTML = `
             <td style="white-space: nowrap;">${item.dateStr}</td>
             <td style="font-family: monospace; font-size: 1.1em;">${formatCurrency(item.spend)}</td>
@@ -197,6 +227,9 @@ function renderData(groupedData) {
                     ${item.messages}
                 </span>
             </td>
+            <td style="font-family: monospace; font-size: 1.1em;">
+                ${formatCurrency(pricePerMess)}
+            </td>
             <td style="color: var(--text-secondary); font-size: 0.9em;">
                 ${item.campaigns.length} chiến dịch
                 <div style="font-size: 0.8em; opacity: 0.7; margin-top: 4px;">${campaignHtml}</div>
@@ -208,22 +241,82 @@ function renderData(groupedData) {
     ELEMENTS.tableBody.appendChild(fragment);
 }
 
-// Search Filter
-ELEMENTS.searchInput.addEventListener('input', (e) => {
-    const term = e.target.value.toLowerCase();
-
-    // Filter RAW data first finds matching rows (either date match or campaign match)
-    const filteredRaw = rawData.filter(item => {
-        return item.dateStr.toLowerCase().includes(term) ||
-            item.campaign.toLowerCase().includes(term);
+// Filter Implementation
+function populateMonthFilter(data) {
+    const months = new Set();
+    data.forEach(item => {
+        if (item.dateObj) {
+            // Format: MM/YYYY
+            const month = item.dateObj.getMonth() + 1; // 0-indexed
+            const year = item.dateObj.getFullYear();
+            const key = `${month}/${year}`;
+            months.add(key);
+        }
     });
 
-    // Then group the filtered results
-    const grouped = groupDataByDate(filteredRaw);
+    // Convert to array and sort descending (newest first)
+    const sortedMonths = [...months].sort((a, b) => {
+        const [m1, y1] = a.split('/').map(Number);
+        const [m2, y2] = b.split('/').map(Number);
+        if (y1 !== y2) return y2 - y1;
+        return m2 - m1;
+    });
 
+    const selector = ELEMENTS.monthFilter;
+    // Keep the "All" option
+    selector.innerHTML = '<option value="all">Tất cả thời gian</option>';
+
+    sortedMonths.forEach(m => {
+        const option = document.createElement('option');
+        option.value = m;
+        option.textContent = `Tháng ${m}`;
+        selector.appendChild(option);
+    });
+
+    // Default to the current month if available, otherwise latest
+    const now = new Date();
+    const currentKey = `${now.getMonth() + 1}/${now.getFullYear()}`;
+
+    if (months.has(currentKey)) {
+        selector.value = currentKey;
+    } else if (sortedMonths.length > 0) {
+        selector.value = sortedMonths[0];
+    }
+}
+
+function applyFilters() {
+    const term = ELEMENTS.searchInput.value.toLowerCase();
+    const month = ELEMENTS.monthFilter.value;
+
+    const filtered = rawData.filter(item => {
+        // Text Search
+        const matchesTerm = item.dateStr.toLowerCase().includes(term) ||
+            item.campaign.toLowerCase().includes(term);
+
+        // Month Filter
+        let matchesMonth = true;
+        if (month !== 'all') {
+            if (!item.dateObj) matchesMonth = false;
+            else {
+                const m = item.dateObj.getMonth() + 1;
+                const y = item.dateObj.getFullYear();
+                const key = `${m}/${y}`;
+                matchesMonth = (key === month);
+            }
+        }
+
+        return matchesTerm && matchesMonth;
+    });
+
+    // Render
+    const grouped = groupDataByDate(filtered);
     renderData(grouped);
-    updateKPIs(filteredRaw); // Update KPIs based on what user sees (filtered subset)
-});
+    updateKPIs(filtered);
+}
+
+// Event Listeners
+ELEMENTS.searchInput.addEventListener('input', applyFilters);
+ELEMENTS.monthFilter.addEventListener('change', applyFilters);
 
 // Refresh
 ELEMENTS.refreshBtn.addEventListener('click', fetchData);

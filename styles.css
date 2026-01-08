@@ -300,3 +300,61 @@ tr:hover td {
         max-width: 100%;
     }
 }
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.month-select {
+    padding: 0.75rem 1rem;
+    background: rgba(15, 23, 42, 0.5);
+    color: var(--text-primary);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2338bdf8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
+}
+
+.month-select:hover {
+    border-color: var(--accent-primary);
+    background-color: rgba(15, 23, 42, 0.7);
+}
+
+.month-select:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.1);
+}
+
+.month-select option {
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    padding: 10px;
+}
+
+.chart-icon {
+    background: rgba(251, 146, 60, 0.1);
+    color: #fb923c;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo {
+    height: 64px;
+    width: auto;
+    object-fit: contain;
+}

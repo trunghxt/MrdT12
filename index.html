@@ -17,19 +17,27 @@
             <!-- Header -->
             <header class="header">
                 <div class="header-content">
-                    <h1>Báo Cáo Ads Mrd Tháng 12</h1>
-                    <p class="subtitle">Tổng hợp dữ liệu hiệu quả chiến dịch</p>
+                    <img src="logo.png" alt="MRD Logo" class="logo">
+                    <div>
+                        <h1>Báo Cáo Ads Mrd</h1>
+                        <p class="subtitle">Tổng hợp dữ liệu hiệu quả chiến dịch</p>
+                    </div>
                 </div>
-                <button id="refreshBtn" class="btn-refresh">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M4 12C4 16.4183 7.58172 20 12 20C14.8969 20 17.4392 18.4552 18.7842 16.0357M20 12C20 7.58172 16.4183 4 12 4C9.27376 4 6.86603 5.38531 5.50005 7.5457"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                        <path d="M4 6V8H6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                    </svg>
-                    Làm mới
-                </button>
+                <div class="header-actions">
+                    <select id="monthFilter" class="month-select">
+                        <option value="all">Tất cả thời gian</option>
+                    </select>
+                    <button id="refreshBtn" class="btn-refresh">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M4 12C4 16.4183 7.58172 20 12 20C14.8969 20 17.4392 18.4552 18.7842 16.0357M20 12C20 7.58172 16.4183 4 12 4C9.27376 4 6.86603 5.38531 5.50005 7.5457"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                            <path d="M4 6V8H6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        Làm mới
+                    </button>
+                </div>
             </header>
 
             <!-- KPI Cards -->
@@ -58,6 +66,19 @@
                     <div class="kpi-content">
                         <h3>Tổng Tin Nhắn</h3>
                         <div id="totalMessages" class="kpi-value">---</div>
+                    </div>
+                </div>
+                <div class="kpi-card glass">
+                    <div class="kpi-icon chart-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M23 6l-9.5 9.5-5-5L1 18"></path>
+                            <path d="M17 6h6v6"></path>
+                        </svg>
+                    </div>
+                    <div class="kpi-content">
+                        <h3>Giá / Mess</h3>
+                        <div id="avgPrice" class="kpi-value">--- ₫</div>
                     </div>
                 </div>
             </section>
@@ -93,6 +114,7 @@
                             <th>Ngày</th>
                             <th>Chi Phí (VND)</th>
                             <th>Tin Nhắn</th>
+                            <th>Giá / Mess</th>
                             <th>Chiến dịch</th>
                         </tr>
                     </thead>
