@@ -20,7 +20,7 @@
 body {
     font-family: 'Outfit', sans-serif;
     background-color: var(--bg-dark);
-    background-image: 
+    background-image:
         radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
         radial-gradient(at 100% 0%, rgba(129, 140, 248, 0.15) 0px, transparent 50%);
     background-attachment: fixed;
@@ -44,12 +44,29 @@ body {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
+/* Sticky Header Wrapper */
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15, 23, 42, 0.95);
+    /* High opacity to hide scrolling content */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    margin: -2rem -2rem 1.5rem -2rem;
+    /* Negative margin to span full width of body padding */
+    padding: 2rem 2rem 1rem 2rem;
+    /* Restore padding */
+    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.2);
+}
+
 /* Header */
+/* Adjust styles since they are now in sticky wrapper */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .header h1 {
@@ -95,7 +112,7 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .kpi-card {
@@ -144,7 +161,8 @@ body {
 }
 
 .controls-bar {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0;
+    /* Remove bottom margin since it's last in sticky wrapper */
 }
 
 .search-box {
@@ -196,12 +214,19 @@ thead {
     background: rgba(15, 23, 42, 0.5);
 }
 
-th, td {
+th,
+td {
     padding: 1rem;
     border-bottom: 1px solid var(--border-color);
 }
 
 th {
+    padding: 1rem;
+    /* Reset sticky for table headers to avoid conflict */
+    /* position: sticky; top: 0; */
+    background: transparent;
+    box-shadow: none;
+    border-bottom: 1px solid var(--border-color);
     font-weight: 600;
     color: var(--text-secondary);
     font-size: 0.875rem;
@@ -242,7 +267,9 @@ tr:hover td {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .error {
@@ -262,13 +289,13 @@ tr:hover td {
     body {
         padding: 1rem;
     }
-    
+
     .header {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
     }
-    
+
     .search-box {
         max-width: 100%;
     }
