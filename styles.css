@@ -198,20 +198,25 @@ body {
 }
 
 /* Table */
-.table-container {
-    overflow-x: auto;
-    border-radius: 8px;
+.table-wrap {
+    max-height: 520px;
+    overflow: auto;
+    border-radius: 16px;
     border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    /* Required for sticky header */
+    border-spacing: 0;
     text-align: left;
 }
 
 thead {
-    background: rgba(15, 23, 42, 0.5);
+    /* Background handled in th for sticky */
+    z-index: 10;
 }
 
 th,
@@ -221,12 +226,14 @@ td {
 }
 
 th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     padding: 1rem;
-    /* Reset sticky for table headers to avoid conflict */
-    /* position: sticky; top: 0; */
-    background: transparent;
-    box-shadow: none;
-    border-bottom: 1px solid var(--border-color);
+    background: #1e293b;
+    /* Solid background to hide scrolling content */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* Shadow to separate header */
     font-weight: 600;
     color: var(--text-secondary);
     font-size: 0.875rem;
@@ -244,6 +251,74 @@ tr:last-child td {
 
 tr:hover td {
     background: var(--hover-bg);
+}
+
+/* Campaign Toggle & Panel */
+.camp-toggle {
+    background: transparent;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    color: var(--accent-primary);
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.camp-toggle:hover {
+    background: rgba(56, 189, 248, 0.1);
+}
+
+.camp-toggle .chevron {
+    font-size: 0.8em;
+    transition: transform 0.2s;
+}
+
+.camp-toggle.active .chevron {
+    transform: rotate(90deg);
+}
+
+.camp-panel {
+    margin-top: 8px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: none;
+    /* Hidden by default */
+}
+
+.camp-panel.open {
+    display: block;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.camp-item {
+    padding: 4px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.camp-item:last-child {
+    border-bottom: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Loading & Error */

@@ -202,14 +202,14 @@ function renderData(groupedData) {
 
     const fragment = document.createDocumentFragment();
 
-    groupedData.forEach(item => {
+    groupedData.forEach((item, index) => {
         const tr = document.createElement('tr');
 
         // Format campaigns list
-        // If too many, maybe show "X Chiến dịch"? Or list all? 
-        // Let's list unique ones to avoid clutter if duplicate names exist (rare per day but possible)
         const uniqueCampaigns = [...new Set(item.campaigns)];
-        let campaignHtml = uniqueCampaigns.join('<br>');
+        // Create HTML for the panel list
+        const campaignListHtml = uniqueCampaigns.map(c => `<div class="camp-item">${c}</div>`).join('');
+        const rowId = `row-${index}`;
 
         const pricePerMess = item.messages > 0 ? item.spend / item.messages : 0;
 
@@ -230,9 +230,13 @@ function renderData(groupedData) {
             <td style="font-family: monospace; font-size: 1.1em;">
                 ${formatCurrency(pricePerMess)}
             </td>
-            <td style="color: var(--text-secondary); font-size: 0.9em;">
-                ${item.campaigns.length} chiến dịch
-                <div style="font-size: 0.8em; opacity: 0.7; margin-top: 4px;">${campaignHtml}</div>
+            <td>
+                <button class="camp-toggle" data-target="${rowId}">
+                    ${uniqueCampaigns.length} chiến dịch <span class="chevron">▸</span>
+                </button>
+                <div id="${rowId}" class="camp-panel">
+                    ${campaignListHtml}
+                </div>
             </td>
         `;
         fragment.appendChild(tr);
@@ -240,6 +244,26 @@ function renderData(groupedData) {
 
     ELEMENTS.tableBody.appendChild(fragment);
 }
+
+// Event Delegation for Campaign Toggles
+ELEMENTS.tableBody.addEventListener('click', (e) => {
+    const toggleBtn = e.target.closest('.camp-toggle');
+    if (!toggleBtn) return;
+
+    const targetId = toggleBtn.dataset.target;
+    const panel = document.getElementById(targetId);
+
+    if (panel) {
+        const isOpen = panel.classList.contains('open');
+
+        // Toggle State
+        panel.classList.toggle('open');
+        toggleBtn.classList.toggle('active');
+
+        // Update Chevron (Visual only, CSS handles rotation but let's be explicit if needed)
+        // CSS handles rotation via .active class
+    }
+});
 
 // Filter Implementation
 function populateMonthFilter(data) {
